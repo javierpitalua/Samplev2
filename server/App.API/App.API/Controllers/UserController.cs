@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using App.API.Models;
 using App.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,53 +13,20 @@ namespace App.API.Controllers
     [Route("users")]
     public class UserController : ControllerBase
     {
-        private readonly UserService userService;
+        private readonly IUserService userService;
 
-        public UserController(UserService userService)
+        public UserController(IUserService userService)
         {
             this.userService = userService;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("getUsers")]
-        public IEnumerable<User> GetUsers(string officeIds)
+        public async Task<IEnumerable<UserDto>> GetUsers([FromBody] GetUsersRequest request, CancellationToken ctoken)
         {
-            var ids = officeIds
-                .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                .Select(o => Guid.Parse(o))
-                .ToArray();
-
-            var users = this.userService.GetUsers()
-                .Where(o => ids.Contains(o.Office.Id))
-                .ToArray();
-
-            var roles = this.userService
-                .GetUserRoles(users.Select(o => o.Id).ToArray());
-
-            try
-            {
-                foreach (var role in roles)
-                {
-                    var user = users.FirstOrDefault(o => o.Id == role.UserId);
-                    if (user is null)
-                    {
-                        continue;
-                    }
-
-                    if (user.Roles is null)
-                    {
-                        user.Roles = new List<UserRole>();
-                    }
-
-                    user.Roles.Add(role);
-                }
-            }
-            catch
-            {
-
-            }
-
-            return users;
+            var ids = request.officeIds == null ? new Guid[]{} :
+                (from office in request.officeIds select new Guid(office)).ToArray();
+            return await this.userService.GetUsersByOfficeIds(ids, ctoken);
         }
     }
 }

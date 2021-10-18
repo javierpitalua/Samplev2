@@ -8,10 +8,10 @@
         <span
           class="bold"
           v-for="role in item.roles"
-          v-bind:key="role.role.id"
-        >
-          {{ role.role.name }}
+          v-bind:key="role.id">
+          {{ role.name }}&nbsp;
         </span>
+        <span>, Office:</span><span class="bold">{{ item.office.address }}</span>
       </div>
     </div>
   </div>
@@ -24,15 +24,21 @@ import userService, { User } from "@/services/UserService";
 
 export default {
   props: {
-    officeIds: type<string[]>(),
+    users: type<User[]>(),
   },
   setup(props) {
     let searchPattern = ref("");
     let data = ref([] as User[]);
 
+    data.value = props.users;
+
     watch(searchPattern, (newValue) => {
-      data.value = userService.getUsers(props.officeIds)
-        ?.filter((o) => o.login.indexOf(newValue) >= 0);
+      if(newValue && newValue.length > 0) {
+          data.value = props.users.filter((element) =>
+              element.login.toLowerCase().includes(newValue.toLowerCase()));
+      } else {
+        data.value = props.users;
+      }      
     });
 
     return {

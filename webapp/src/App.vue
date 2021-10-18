@@ -7,6 +7,8 @@
     />
     <button @click="onOfficeSearch">Search</button>
     <button @click="onUserSearch">Get Users</button>
+
+
     <div class="user-list">
       <div v-for="office in offices" v-bind:key="office.id">
         <div>
@@ -19,8 +21,9 @@
         </div>
       </div>
     </div>
+
   </div>
-  <div v-if="users.length > 0">
+  <div v-if="users && users.length > 0">
     <UserList :users="users" />
   </div>
 </template>
@@ -39,17 +42,16 @@ export default {
     let selectedOffices = ref([] as string[]);
     let users = ref([] as User[]);
 
-    function onOfficeSearch() {
-      officeService
-        .getOffices(searchPattern.value)
-        ?.then((o) => (offices.value = o));
+    async function onOfficeSearch() {
+      offices.value = await officeService.getOffices(searchPattern.value);
     }
 
-    function onUserSearch() {
-        users.value = userService.getUsers(selectedOffices.value);
+    async function onUserSearch() {        
+        let offices: string[] = selectedOffices.value;
+        users.value = await userService.getUsers(selectedOffices.value);
     }
 
-    function onSelectOffice(id: string) {
+    function onSelectOffice(id: string) {      
       if (selectedOffices.value.indexOf(id) >= 0) {
         selectedOffices.value = selectedOffices.value.filter((o) => o != id);
       } else {

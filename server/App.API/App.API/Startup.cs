@@ -24,8 +24,9 @@ namespace App.API
         {
             SqlMapper.AddTypeHandler(new SqlGuidTypeHandler());
             services.AddDbContext<SampleAppContext>();
-            services.AddTransient<UserService>();
-            
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOfficeService, OfficeService>();
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -40,19 +41,18 @@ namespace App.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "App.API v1"));
+
+                app.UseCors(o => o
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin());
             }
 
-            app.UseCors(o => o
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowAnyOrigin());
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "App.API v1"));
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

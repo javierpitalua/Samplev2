@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using App.API.Data;
 using App.API.Models;
 using App.API.Services;
@@ -14,18 +16,18 @@ namespace App.API.Controllers
     [Route("offices")]
     public class OfficeController : ControllerBase
     {
-        private readonly SampleAppContext context;
+        private readonly IOfficeService officeService;
 
-        public OfficeController(SampleAppContext context)
+        public OfficeController(SampleAppContext context, IOfficeService officeService)
         {
-            this.context = context;
+            this.officeService = officeService;
         }
 
         [HttpGet]
         [Route("getOffices")]
-        public IEnumerable<Office> GetOffices(string searchPattern)
-            // to avoid additional allocations
-            => context.Query<Office>($@"select * from Offices where lower(Address) like lower('%{searchPattern}%')");       
-            
+        public async Task<Office[]> GetOffices(string searchPattern, CancellationToken ctoken)
+        {
+            return await this.officeService.GetOffices(searchPattern, ctoken);
+        }   
     }
 }

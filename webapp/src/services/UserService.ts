@@ -18,13 +18,14 @@ export class User {
 }
 
 export class UserService {
-    public getUsers(officeIds: string[]): any {
+    public async getUsers(officeIds: string[]): Promise<User[]> {        
         let ids = ''
         officeIds.forEach(element => {
             ids += element + ','
         });
 
-        restClient.get<User[]>("users/getUsers", {officeIds: ids})
+        let items = await restClient.post<User[]>("users/getUsers", {officeIds})
+        return items
     }
 }
 

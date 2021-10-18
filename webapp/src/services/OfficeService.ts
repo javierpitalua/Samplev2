@@ -5,8 +5,8 @@ export class Office {
 }
 
 export class OfficeService {
-    public getOffices(pattern: string) {
-        return restClient.get<Office[]>("offices/getOffices", { searchPattern: pattern });
+    public async getOffices(pattern: string): Promise<Office[]> {
+        return await restClient.get<Office[]>("offices/getOffices", { searchPattern: pattern });
     }
 }
 
